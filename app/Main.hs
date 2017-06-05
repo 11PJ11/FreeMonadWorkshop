@@ -44,12 +44,12 @@ runLog :: Program Bool -> [String] -> [String]
 runLog prog logs = do
   let res = run prog
   case (prog, logs) of
-    (Free (AND b1 b2 next), ls) -> do
-      (show b1 ++ " and " ++ show b2 ++ " = " ++ show res):(runLog (next(res)) ls)
-    (Free (OR b1 b2 next), ls) -> do
-      (show b1 ++ " or " ++ show b2 ++ " = " ++ show res):(runLog (next(res)) ls)
-    (Free (NOT b1 next), ls) -> do
-      ("not " ++ show b1++ " = " ++ show res):(runLog (next(res)) ls)
+    (Free (AND b1 b2 next), ls) ->
+      (show b1 ++ " and " ++ show b2 ++ " = " ++ show res):runLog (next res) ls
+    (Free (OR b1 b2 next), ls) ->
+      (show b1 ++ " or " ++ show b2 ++ " = " ++ show res):runLog (next res) ls
+    (Free (NOT b1 next), ls) ->
+      ("not " ++ show b1++ " = " ++ show res):runLog (next res) ls
     (Free (RETURN b), ls) ->
       ("return " ++ show b):ls
     (Pure b, ls) -> []
@@ -68,5 +68,5 @@ instructions = do
 main :: IO ()
 main = do
   let execution = runLog instructions []
-  mapM_ (putStrLn . show) execution
+  mapM_ print execution
   -- putStrLn . show $ run instructions
