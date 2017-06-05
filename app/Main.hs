@@ -30,19 +30,27 @@ not' b1 = liftF $ NOT b1 id
 return' :: Bool -> Program Bool
 return' b1 = liftF $ RETURN b1
 
+eval :: Program Bool -> Bool
+eval prog = case prog of
+  Free (AND b1 b2 _) -> b1 && b2
+  Free (OR b1 b2 _)  -> b1 || b2
+  Free (NOT b _)     -> not b
+  Free (RETURN b)    -> b
+  Pure b             -> b
+
 -- Pure Interpreter
 run :: Program Bool -> Bool
 run prog = case prog of
-  Free (AND b1 b2 next) -> run (next(b1 && b2))
-  Free (OR b1 b2 next)  -> run (next(b1 || b2))
-  Free (NOT b next)     -> run (next(not b))
-  Free (RETURN b)       -> b
-  Pure b                -> b
+    Free (AND _ _ next) -> run (next (eval prog))
+    Free (OR _ _ next)  -> run (next (eval prog))
+    Free (NOT _  next)  -> run (next (eval prog))
+    Free (RETURN b)     -> b
+    Pure b              -> b
 
 -- Pure Interpreter with logging
 runLog :: Program Bool -> [String] -> [String]
 runLog prog logs = do
-  let res = run prog
+  let res = eval prog
   case (prog, logs) of
     (Free (AND b1 b2 next), ls) ->
       (show b1 ++ " and " ++ show b2 ++ " = " ++ show res):runLog (next res) ls
@@ -59,14 +67,21 @@ runLog prog logs = do
 -- reads a String and creates a
 -- Program of Bool
 instructions :: Program Bool
-instructions = do
-  false <- not' True
-  trueOrfalse <- or' True false
-  res <- and' false trueOrfalse
+instructions =
+  -- do
+  -- tof <- or' True False
+  -- tatof <- and' True tof
+  -- let res = tatof
+  -- return' res
+
+  or' True False >>= \tOf ->
+  and' True tOf >>= \tAtOf ->
+  not' tAtOf >>= \res ->
   return' res
 
 main :: IO ()
-main = do
+main =
+  do
   let execution = runLog instructions []
   mapM_ print execution
-  -- putStrLn . show $ run instructions
+  -- print $ run instructions
