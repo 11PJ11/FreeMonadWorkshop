@@ -1,7 +1,10 @@
-# FreeTut
+# Free Monad Workshop
+
+This is an example usage of the Free Monad in Haskell based on the resources at the end of this document.
+It also provides an example of a stack based Haskell project.
 
 ## Prerequisites
-make sure you installed the Free package running:
+make sure you installed the Free package running on your terminal:
 ```
 stack install free
 ```
